@@ -35,6 +35,7 @@ const char Maze::Z = 2;
 const float Maze::BUFFER = 0.1f;
 
 
+
 float* multMatrix(float* a, float* b) {
 	float* c = (float*)malloc(16 * sizeof(float));
 
