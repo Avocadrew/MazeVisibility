@@ -118,7 +118,7 @@ draw(void)
 		// Note that all the information that is required to do the
 		// transformations and projection is contained in the Maze class,
 		// plus the focal length.
-		maze->Draw_View(focal_length);
+		maze->Draw_View(focal_length, w(), h());
 	}
 }
 
