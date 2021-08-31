@@ -44,7 +44,7 @@ include CMakeFiles\rules.ninja
 build cmake_object_order_depends_target_MazeVisibility: phony || cmake_object_order_depends_target_MazeLib
 
 build CMakeFiles\MazeVisibility.dir\src\MapWidget.cpp.obj: CXX_COMPILER__MazeVisibility_Debug ..\..\..\src\MapWidget.cpp || cmake_object_order_depends_target_MazeVisibility
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeVisibility.dir
@@ -53,7 +53,7 @@ build CMakeFiles\MazeVisibility.dir\src\MapWidget.cpp.obj: CXX_COMPILER__MazeVis
   TARGET_PDB = MazeVisibility.pdb
 
 build CMakeFiles\MazeVisibility.dir\src\Maze.cpp.obj: CXX_COMPILER__MazeVisibility_Debug ..\..\..\src\Maze.cpp || cmake_object_order_depends_target_MazeVisibility
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeVisibility.dir
@@ -62,7 +62,7 @@ build CMakeFiles\MazeVisibility.dir\src\Maze.cpp.obj: CXX_COMPILER__MazeVisibili
   TARGET_PDB = MazeVisibility.pdb
 
 build CMakeFiles\MazeVisibility.dir\src\MazeWindow.cpp.obj: CXX_COMPILER__MazeVisibility_Debug ..\..\..\src\MazeWindow.cpp || cmake_object_order_depends_target_MazeVisibility
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeVisibility.dir
@@ -71,7 +71,7 @@ build CMakeFiles\MazeVisibility.dir\src\MazeWindow.cpp.obj: CXX_COMPILER__MazeVi
   TARGET_PDB = MazeVisibility.pdb
 
 build CMakeFiles\MazeVisibility.dir\src\RunMaze.cpp.obj: CXX_COMPILER__MazeVisibility_Debug ..\..\..\src\RunMaze.cpp || cmake_object_order_depends_target_MazeVisibility
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeVisibility.dir
@@ -109,7 +109,7 @@ build MazeVisibility.exe: CXX_EXECUTABLE_LINKER__MazeVisibility_Debug CMakeFiles
 build cmake_object_order_depends_target_MazeLib: phony || CMakeFiles\MazeLib.dir
 
 build CMakeFiles\MazeLib.dir\src\Cell.cpp.obj: CXX_COMPILER__MazeLib_Debug ..\..\..\src\Cell.cpp || cmake_object_order_depends_target_MazeLib
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeLib.dir
@@ -118,7 +118,7 @@ build CMakeFiles\MazeLib.dir\src\Cell.cpp.obj: CXX_COMPILER__MazeLib_Debug ..\..
   TARGET_PDB = MazeLib.pdb
 
 build CMakeFiles\MazeLib.dir\src\Edge.cpp.obj: CXX_COMPILER__MazeLib_Debug ..\..\..\src\Edge.cpp || cmake_object_order_depends_target_MazeLib
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeLib.dir
@@ -127,7 +127,7 @@ build CMakeFiles\MazeLib.dir\src\Edge.cpp.obj: CXX_COMPILER__MazeLib_Debug ..\..
   TARGET_PDB = MazeLib.pdb
 
 build CMakeFiles\MazeLib.dir\src\LineSeg.cpp.obj: CXX_COMPILER__MazeLib_Debug ..\..\..\src\LineSeg.cpp || cmake_object_order_depends_target_MazeLib
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeLib.dir
@@ -136,7 +136,7 @@ build CMakeFiles\MazeLib.dir\src\LineSeg.cpp.obj: CXX_COMPILER__MazeLib_Debug ..
   TARGET_PDB = MazeLib.pdb
 
 build CMakeFiles\MazeLib.dir\src\Vertex.cpp.obj: CXX_COMPILER__MazeLib_Debug ..\..\..\src\Vertex.cpp || cmake_object_order_depends_target_MazeLib
-  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)\"" -D_XKEYCHECK_H
+  DEFINES = -DPROJECT_DIR="\"D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility\"" -D_XKEYCHECK_H
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\include -I..\..\..\lib
   OBJECT_DIR = CMakeFiles\MazeLib.dir
@@ -167,7 +167,7 @@ build MazeLib.lib: CXX_STATIC_LIBRARY_LINKER__MazeLib_Debug CMakeFiles\MazeLib.d
 # Utility command for edit_cache
 
 build CMakeFiles\edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D "D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility(III)\out\build\x64-Debug" && "E:\Program Files\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
+  COMMAND = cmd.exe /C "cd /D "D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility\out\build\x64-Debug" && "E:\Program Files\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E echo "No interactive CMake dialog available.""
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -178,7 +178,7 @@ build edit_cache: phony CMakeFiles\edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles\rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cmd.exe /C "cd /D "D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility(III)\out\build\x64-Debug" && "E:\Program Files\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" --regenerate-during-build -S"D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility(III)" -B"D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility(III)\out\build\x64-Debug""
+  COMMAND = cmd.exe /C "cd /D "D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility\out\build\x64-Debug" && "E:\Program Files\Microsoft Visual Studio\2019\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" --regenerate-during-build -S"D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility" -B"D:\台科上課資料\大四上\CS3026 電腦圖學導論_賴祐吉\MazeVisibility\out\build\x64-Debug""
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -198,7 +198,7 @@ build MazeVisibility: phony MazeVisibility.exe
 # =============================================================================
 
 #############################################
-# Folder: D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility(III)/out/build/x64-Debug
+# Folder: D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility/out/build/x64-Debug
 
 build all: phony MazeVisibility.exe MazeLib.lib
 

@@ -32,11 +32,24 @@ const float Maze::BUFFER = 0.1f;
 
 struct wallParams
 {
-	float points[4][4];
 	float color[3];
+	float points[4][4];
 };
 
+struct polygon
+{
+	int edgeCnt = 0;
+	float points[4][4];
+};
 
+bool cmp(wallParams* lhs, wallParams* rhs)
+{
+	if (lhs->points[0][3] + lhs->points[1][3] > rhs->points[0][3] + rhs->points[1][3])
+	{
+		return true;
+	}
+	return false;
+}
 
 
 
@@ -723,10 +736,7 @@ Draw_View(const float focal_dist, int width, int height)
 			walls.push_back(temp);
 		}
 	}
-	sort(walls.begin(), walls.end(), [](wallParams* lhs, wallParams* rhs) {
-		return lhs->points[0][3] + lhs->points[1][3] > rhs->points[0][3] + rhs->points[1][3];
-		});
-
+	sort(walls.begin(), walls.end(), cmp);
 
 	for (const auto& wall : walls) {
 		std::vector<std::vector<float>> clipingPoints;
