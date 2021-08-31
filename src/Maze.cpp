@@ -22,6 +22,7 @@
 #include <GL/glu.h>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 const char Maze::X = 0;
 const char Maze::Y = 1;
@@ -29,19 +30,13 @@ const char Maze::Z = 2;
 
 const float Maze::BUFFER = 0.1f;
 
+struct wallParams
+{
+	float points[4][4];
+	float color[3];
+};
 
-float* multVector(float a[4][4], float* b) {
-	float* c = (float*)malloc(4 * sizeof(float));
 
-	for (int i = 0; i < 4; i++) {
-		c[i] = 0;
-		for (int k = 0; k < 4; k++) {
-			c[i] += a[i][k] * b[k];
-		}
-	}
-
-	return c;
-}
 
 
 
@@ -661,12 +656,11 @@ Draw_View(const float focal_dist, int width, int height)
 		{0, 0, 0, 1.0f}
 	};
 
-	float r = tan(Maze::To_Radians(viewer_fov / 2.0f)) * 0.01f;
 
 	float view2screen[4][4] = 
 	{ 
-		{0.01f / r, 0, 0, 0},
-		{0, 0.01f / r, 0, 0},
+		{0.01f/ (tan(Maze::To_Radians(viewer_fov / 2.0f)) * 0.01f), 0, 0, 0},
+		{0, 0.01f / (tan(Maze::To_Radians(viewer_fov / 2.0f)) * 0.01f), 0, 0},
 		{0, 0, (-(200.0f + 0.01f)) / (200.0f - 0.01f), (-2.0f * 200.0f * 0.01f) / (200.0f - 0.01f)},
 		{0, 0, -1.0f, 0 }
 	};
@@ -698,73 +692,72 @@ Draw_View(const float focal_dist, int width, int height)
 	}
 
 
-	std::vector<std::vector<float*>> cells;
+	std::vector<wallParams*> walls;
 
 	for (int i = 0; i < (int)this->num_edges; i++) {
-		float edge_start[2] = {
-			this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],
-			this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y]
-		};
-		float edge_end[2] = {
-			this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],
-			this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y]
-		};
-
-		float color[3] = { this->edges[i]->color[0], this->edges[i]->color[1], this->edges[i]->color[2] };
 		if (this->edges[i]->opaque) {
-			float point0[4] = { edge_start[1], 1.0f, edge_start[0], 1.0f };
-			float point1[4] = { edge_end[1], 1.0f, edge_end[0], 1.0f };
-			float point2[4] = { edge_end[1], -1.0f, edge_end[0], 1.0f };
-			float point3[4] = { edge_start[1], -1.0f, edge_start[0], 1.0f };
-
-			std::vector<float*> cell;
-
-			cell.push_back(multVector(world2screen, point0));
-			cell.push_back(multVector(world2screen, point1));
-			cell.push_back(multVector(world2screen, point2));
-			cell.push_back(multVector(world2screen, point3));
-			cell.push_back(this->edges[i]->color);
-			cells.push_back(cell);
+			
+			float point[4][4] =
+			{
+				{this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y],this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y],this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y],this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y]},
+				{1.0f,1.0f,-1.0f,-1.0f},
+				{this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],this->edges[i]->endpoints[Edge::START]->posn[Vertex::X]},
+				{1.0f,1.0f,1.0f,1.0f}
+			};
+			wallParams* temp = (struct wallParams*)malloc(sizeof(struct wallParams));
+			for (int l = 0; l < 4; l++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					temp->points[j][l] = 0;
+					for (int k = 0; k < 4; k++)
+					{
+						temp->points[j][l] += world2screen[l][k] * point[k][j];
+					}
+				}
+			}
+			for (int j = 0; j < 3; j++)
+			{
+				temp->color[j] = this->edges[i]->color[j];
+			}
+			walls.push_back(temp);
 		}
 	}
-
-	sort(cells.begin(), cells.end(), [](std::vector<float*> lhs, std::vector<float*> rhs) {
-		return lhs[0][3] + lhs[1][3] > rhs[0][3] + rhs[1][3];
+	sort(walls.begin(), walls.end(), [](wallParams* lhs, wallParams* rhs) {
+		return lhs->points[0][3] + lhs->points[1][3] > rhs->points[0][3] + rhs->points[1][3];
 		});
 
 
-
-	for (const auto& points : cells) {
+	for (const auto& wall : walls) {
 		std::vector<std::vector<float>> clipingPoints;
 		for (int i = 0; i < 4; i++) {
 			int start = i;
 			int end = (i + 1 < 4 ? i + 1 : 0);
 
 
-			if (points[start][3] >= 0.001 && points[end][3] >= 0.001) {
-				clipingPoints.push_back({ points[end][0], points[end][1], points[end][2], points[end][3] });
+			if (wall->points[start][3] >= 0.001 && wall->points[end][3] >= 0.001) {
+				clipingPoints.push_back({ wall->points[end][0], wall->points[end][1], wall->points[end][2], wall->points[end][3] });
 			}
-			else if (points[start][3] >= 0.001 && points[end][3] < 0.001) {
-				float newX = points[start][0] + (points[end][0] - points[start][0]) * ((0.001 - points[start][3]) / (points[end][3] - points[start][3]));
-				float newY = points[start][1] + (points[end][1] - points[start][1]) * ((0.001 - points[start][3]) / (points[end][3] - points[start][3]));
-				float newZ = points[start][2] + (points[end][2] - points[start][2]) * ((0.001 - points[start][3]) / (points[end][3] - points[start][3]));
+			else if (wall->points[start][3] >= 0.001 && wall->points[end][3] < 0.001) {
+				float newX = wall->points[start][0] + (wall->points[end][0] - wall->points[start][0]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
+				float newY = wall->points[start][1] + (wall->points[end][1] - wall->points[start][1]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
+				float newZ = wall->points[start][2] + (wall->points[end][2] - wall->points[start][2]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
 
 				clipingPoints.push_back({ newX, newY, newZ, 0.001 });
 			}
-			else if (points[start][3] < 0.001 && points[end][3] >= 0.001) {
-				float newX = points[start][0] + (points[end][0] - points[start][0]) * ((0.001 - points[start][3]) / (points[end][3] - points[start][3]));
-				float newY = points[start][1] + (points[end][1] - points[start][1]) * ((0.001 - points[start][3]) / (points[end][3] - points[start][3]));
-				float newZ = points[start][2] + (points[end][2] - points[start][2]) * ((0.001 - points[start][3]) / (points[end][3] - points[start][3]));
+			else if (wall->points[start][3] < 0.001 && wall->points[end][3] >= 0.001) {
+				float newX = wall->points[start][0] + (wall->points[end][0] - wall->points[start][0]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
+				float newY = wall->points[start][1] + (wall->points[end][1] - wall->points[start][1]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
+				float newZ = wall->points[start][2] + (wall->points[end][2] - wall->points[start][2]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
 
 				clipingPoints.push_back({ newX, newY, newZ, 0.001 });
-				clipingPoints.push_back({ points[end][0], points[end][1], points[end][2], points[end][3] });
+				clipingPoints.push_back({ wall->points[end][0], wall->points[end][1], wall->points[end][2], wall->points[end][3] });
 			}
 		}
 
 		if (clipingPoints.size() == 4) {
 			glBegin(GL_POLYGON);
-			glColor3f(points[4][0], points[4][1], points[4][2]);
-
+			glColor3f(wall->color[0], wall->color[1], wall->color[2]);
 			for (const auto& p : clipingPoints) {
 				glVertex2f(p[0] / p[3], p[1] / p[3]);
 			}
