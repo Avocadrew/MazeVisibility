@@ -125,8 +125,7 @@
 				2,
 				4,
 				6,
-				8,
-				9
+				8
 			]
 		},
 		{
@@ -189,11 +188,6 @@
 		{
 			"backtrace" : 1,
 			"path" : "src/Vertex.h",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"path" : "src/Wall.h",
 			"sourceGroupIndex" : 0
 		}
 	],
