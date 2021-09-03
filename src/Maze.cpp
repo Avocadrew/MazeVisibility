@@ -12,6 +12,7 @@
 *************************************************************************/
 
 #include "Maze.h"
+#include "LineSeg.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -20,37 +21,12 @@
 #include <FL/Fl.h>
 #include <FL/fl_draw.h>
 #include <GL/glu.h>
-#include <vector>
-#include <algorithm>
-#include <iostream>
 
 const char Maze::X = 0;
 const char Maze::Y = 1;
 const char Maze::Z = 2;
 
 const float Maze::BUFFER = 0.1f;
-
-struct wallParams
-{
-	float color[3];
-	float points[4][4];
-};
-
-struct polygon
-{
-	int edgeCnt = 0;
-	float points[4][4];
-};
-
-bool cmp(wallParams* lhs, wallParams* rhs)
-{
-	if (lhs->points[0][3] + lhs->points[1][3] > rhs->points[0][3] + rhs->points[1][3])
-	{
-		return true;
-	}
-	return false;
-}
-
 
 
 //**********************************************************************
@@ -648,131 +624,117 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 //   THIS IS THE FUINCTION YOU SHOULD MODIFY.
 //======================================================================
 void Maze::
-Draw_View(const float focal_dist, int width, int height)
-//======================================================================
-{
-	frame_num++;
-
-	float translation[4][4] = 
-	{ 
-		{1.0f, 0, 0, -viewer_posn[1]},
-		{0, 1.0f, 0, -viewer_posn[2]},
-		{0, 0, 1.0f, -viewer_posn[0]},
-		{0, 0, 0, 1 }
+Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
+	float gCos = cos(Maze::To_Radians(this->viewer_dir));
+	float gSin = sin(Maze::To_Radians(this->viewer_dir));
+	float mMat[16] = {//model
+		gCos,	0,	-gSin,	-this->viewer_posn[1] * gCos - this->viewer_posn[0] * -gSin,
+		0,		1,	0,		-this->viewer_posn[2],
+		-gSin,	0,	-gCos,	-this->viewer_posn[1] * -gSin - this->viewer_posn[0] * -gCos,
+		0,		0,	0,		1
 	};
+	for (int edgeIndex = 0; edgeIndex < 4; edgeIndex++) {
+		float crossParR1 = LineSeg(&viewLineR).Cross_Param(LineSeg(drawCell->edges[edgeIndex]));
+		float crossParR2 = LineSeg(drawCell->edges[edgeIndex]).Cross_Param(LineSeg(&viewLineR));
+		float crossParL1 = LineSeg(&viewLineL).Cross_Param(LineSeg(drawCell->edges[edgeIndex]));
+		float crossParL2 = LineSeg(drawCell->edges[edgeIndex]).Cross_Param(LineSeg(&viewLineL));
+		float p[2][2];
+		p[0][0] = drawCell->edges[edgeIndex]->endpoints[0]->posn[0];
+		p[0][1] = drawCell->edges[edgeIndex]->endpoints[0]->posn[1];
+		p[1][0] = drawCell->edges[edgeIndex]->endpoints[1]->posn[0];
+		p[1][1] = drawCell->edges[edgeIndex]->endpoints[1]->posn[1];
+		int sideRS = viewLineR.Point_Side(p[0][0], p[0][1]);
+		int sideRE = viewLineR.Point_Side(p[1][0], p[1][1]);
+		int sideLS = viewLineL.Point_Side(p[0][0], p[0][1]);
+		int sideLE = viewLineL.Point_Side(p[1][0], p[1][1]);
+		bool crossR = 0. < crossParR1 && 0. < crossParR2 && crossParR2 < 1.;
+		bool crossL = 0. < crossParL1 && 0. < crossParL2 && crossParL2 < 1.;
+		bool includeRL = (sideRS == 0 || sideRS == 2) && (sideRE == 0 || sideRE == 2) && (sideLS == 1 || sideLS == 2) && (sideLE == 1 || sideLE == 2);
+		if ((crossR || crossL || includeRL) && drawCell->edges[edgeIndex]->drawFram != this->frame_num) {
+			//clip wall
+			if (crossR && crossL) {
+				if (sideRS == 1 || sideRS == 2) {
+					float tp[2] = { p[0][0],p[0][1] };
+					p[0][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
+					p[0][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
 
-	float rotation[4][4] = 
-	{ 
-		{-cos(Maze::To_Radians(viewer_dir)), 0, sin(Maze::To_Radians(viewer_dir)), 0},
-		{0, 1.0f, 0, 0},
-		{-sin(Maze::To_Radians(viewer_dir)), 0, -cos(Maze::To_Radians(viewer_dir)), 0},
-		{0, 0, 0, 1.0f}
-	};
+					p[1][0] = tp[0] + (p[1][0] - tp[0]) * crossParL2;
+					p[1][1] = tp[1] + (p[1][1] - tp[1]) * crossParL2;
+				}
+				else {
+					float tp[2] = { p[1][0],p[1][1] };
+					p[1][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
+					p[1][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
 
-
-	float view2screen[4][4] = 
-	{ 
-		{0.01f/ (tan(Maze::To_Radians(viewer_fov / 2.0f)) * 0.01f), 0, 0, 0},
-		{0, 0.01f / (tan(Maze::To_Radians(viewer_fov / 2.0f)) * 0.01f), 0, 0},
-		{0, 0, (-(200.0f + 0.01f)) / (200.0f - 0.01f), (-2.0f * 200.0f * 0.01f) / (200.0f - 0.01f)},
-		{0, 0, -1.0f, 0 }
-	};
-
-
-	float world2view[4][4];
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			world2view[i][j] = 0;
-			for (int k = 0; k < 4; k++)
-			{
-				world2view[i][j] += rotation[i][k] * translation[k][j];
-			}
-		}
-	}
-	float world2screen[4][4];
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-		{
-			world2screen[i][j] = 0;
-			for (int k = 0; k < 4; k++)
-			{
-				world2screen[i][j] += view2screen[i][k] * world2view[k][j];
-			}
-		}
-	}
-
-
-	std::vector<wallParams*> walls;
-
-	for (int i = 0; i < (int)this->num_edges; i++) {
-		if (this->edges[i]->opaque) {
-			
-			float point[4][4] =
-			{
-				{this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y],this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y],this->edges[i]->endpoints[Edge::END]->posn[Vertex::Y],this->edges[i]->endpoints[Edge::START]->posn[Vertex::Y]},
-				{1.0f,1.0f,-1.0f,-1.0f},
-				{this->edges[i]->endpoints[Edge::START]->posn[Vertex::X],this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],this->edges[i]->endpoints[Edge::END]->posn[Vertex::X],this->edges[i]->endpoints[Edge::START]->posn[Vertex::X]},
-				{1.0f,1.0f,1.0f,1.0f}
-			};
-			wallParams* temp = (struct wallParams*)malloc(sizeof(struct wallParams));
-			for (int l = 0; l < 4; l++)
-			{
-				for (int j = 0; j < 4; j++)
-				{
-					temp->points[j][l] = 0;
-					for (int k = 0; k < 4; k++)
-					{
-						temp->points[j][l] += world2screen[l][k] * point[k][j];
-					}
+					p[0][0] = p[0][0] + (tp[0] - p[0][0]) * crossParL2;
+					p[0][1] = p[0][1] + (tp[1] - p[0][1]) * crossParL2;
 				}
 			}
-			for (int j = 0; j < 3; j++)
-			{
-				temp->color[j] = this->edges[i]->color[j];
+			if (crossR && !crossL) {
+				if (sideRS == 0 || sideRS == 2 && sideRE == 1) {
+					p[1][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
+					p[1][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
+				}
+				else {
+					p[0][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
+					p[0][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
+				}
 			}
-			walls.push_back(temp);
-		}
-	}
-	sort(walls.begin(), walls.end(), cmp);
-
-	for (const auto& wall : walls) {
-		std::vector<std::vector<float>> clipingPoints;
-		for (int i = 0; i < 4; i++) {
-			int start = i;
-			int end = (i + 1 < 4 ? i + 1 : 0);
-
-
-			if (wall->points[start][3] >= 0.001 && wall->points[end][3] >= 0.001) {
-				clipingPoints.push_back({ wall->points[end][0], wall->points[end][1], wall->points[end][2], wall->points[end][3] });
+			if (!crossR && crossL) {
+				if (sideLS == 1 || sideLS == 2 && sideLE == 0) {
+					p[1][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParL2;
+					p[1][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParL2;
+				}
+				else {
+					p[0][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParL2;
+					p[0][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParL2;
+				}
 			}
-			else if (wall->points[start][3] >= 0.001 && wall->points[end][3] < 0.001) {
-				float newX = wall->points[start][0] + (wall->points[end][0] - wall->points[start][0]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
-				float newY = wall->points[start][1] + (wall->points[end][1] - wall->points[start][1]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
-				float newZ = wall->points[start][2] + (wall->points[end][2] - wall->points[start][2]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
-
-				clipingPoints.push_back({ newX, newY, newZ, 0.001 });
+			if ((p[0][0] - p[1][0]) * (p[0][0] - p[1][0]) < 0.000000001 && (p[0][1] - p[1][1]) * (p[0][1] - p[1][1]) < 0.000000001)
+				continue;
+			//draw wall
+			drawCell->edges[edgeIndex]->drawFram = this->frame_num;
+			if (drawCell->edges[edgeIndex]->opaque) {
+				float sp[4][4] = {
+					{p[0][1], 1,p[0][0],1},
+					{p[0][1],-1,p[0][0],1},
+					{p[1][1], 1,p[1][0],1},
+					{p[1][1],-1,p[1][0],1}
+				};
+				float sp2[4][4];
+				for (int i = 0; i < 4; i++) {
+					for (int j = 0; j < 4; j++) {
+						sp2[i][j] = mMat[j * 4 + 0] * sp[i][0] + mMat[j * 4 + 1] * sp[i][1] + mMat[j * 4 + 2] * sp[i][2] + mMat[j * 4 + 3] * sp[i][3];
+					}
+				}
+				for (int i = 0; i < 4; i++) {
+					sp2[i][0] *= focal_length / sp2[i][2];
+					sp2[i][1] *= focal_length / sp2[i][2];
+				}
+				glBegin(GL_QUADS);
+				glColor3fv(drawCell->edges[edgeIndex]->color);
+				glVertex2fv(sp2[0]);
+				glVertex2fv(sp2[1]);
+				glVertex2fv(sp2[3]);
+				glVertex2fv(sp2[2]);
+				glEnd();
 			}
-			else if (wall->points[start][3] < 0.001 && wall->points[end][3] >= 0.001) {
-				float newX = wall->points[start][0] + (wall->points[end][0] - wall->points[start][0]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
-				float newY = wall->points[start][1] + (wall->points[end][1] - wall->points[start][1]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
-				float newZ = wall->points[start][2] + (wall->points[end][2] - wall->points[start][2]) * ((0.001 - wall->points[start][3]) / (wall->points[end][3] - wall->points[start][3]));
-
-				clipingPoints.push_back({ newX, newY, newZ, 0.001 });
-				clipingPoints.push_back({ wall->points[end][0], wall->points[end][1], wall->points[end][2], wall->points[end][3] });
+			else {
+				if (drawCell->edges[edgeIndex]->Neighbor(drawCell)) {
+					Vertex viewPointO(0, this->viewer_posn[0], this->viewer_posn[1]);
+					Vertex nextViewPointR(0, p[1][0], p[1][1]);
+					Vertex nextViewPointL(0, p[0][0], p[0][1]);
+					if ((crossParR1 > 0 && crossParL1 > 0 && crossParR2 < crossParL2) || (!(crossParR1 > 0 && crossParL1 > 0) && crossParR2 > crossParL2)) {
+						nextViewPointR.posn[0] = p[0][0];
+						nextViewPointR.posn[1] = p[0][1];
+						nextViewPointL.posn[0] = p[1][0];
+						nextViewPointL.posn[1] = p[1][1];
+					}
+					Edge nextViewLineR(0, &viewPointO, &nextViewPointR, 0, 0, 0);
+					Edge nextViewLineL(0, &viewPointO, &nextViewPointL, 0, 0, 0);
+					Draw_View(drawCell->edges[edgeIndex]->Neighbor(drawCell), nextViewLineR, nextViewLineL, focal_length);
+				}
 			}
-		}
-
-		if (clipingPoints.size() == 4) {
-			glBegin(GL_POLYGON);
-			glColor3f(wall->color[0], wall->color[1], wall->color[2]);
-			for (const auto& p : clipingPoints) {
-				glVertex2f(p[0] / p[3], p[1] / p[3]);
-			}
-
-			glEnd();
 		}
 	}
 }

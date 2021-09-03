@@ -18,6 +18,7 @@
 *************************************************************************/
 
 #include "MazeWindow.h"
+#include "Maze.h"
 #include <Fl/math.h>
 #include <Fl/gl.h>
 #include <GL/glu.h>
@@ -51,7 +52,7 @@ Set_Maze(Maze *m)
 {
 	// Change the maze
 	maze = m;
-
+	viewCell = 0;
 	// Force a redraw
 	redraw();
 }
@@ -84,7 +85,7 @@ draw(void)
 
 	// Clear the screen.
 	glClear(GL_COLOR_BUFFER_BIT);
-	glLoadIdentity();
+
 	glBegin(GL_QUADS);
 	// Draw the "floor". It is an infinite plane perpendicular to
 	// vertical, so we know it projects to cover the entire bottom
@@ -118,7 +119,16 @@ draw(void)
 		// Note that all the information that is required to do the
 		// transformations and projection is contained in the Maze class,
 		// plus the focal length.
-		maze->Draw_View(focal_length, w(), h());
+		maze->frame_num++;
+		if (viewCell != maze->view_cell) {
+			viewCell = maze->view_cell;
+		}
+		Vertex viewPointO(0,maze->viewer_posn[0],maze->viewer_posn[1]);
+		Vertex viewPointR(0,maze->viewer_posn[0]+focal_length*cos(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)),maze->viewer_posn[1]+focal_length*sin(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)));
+		Vertex viewPointL(0,maze->viewer_posn[0]+focal_length*cos(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)),maze->viewer_posn[1]+focal_length*sin(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)));
+		Edge viewLineR(0,&viewPointO,&viewPointR,0,0,0);
+		Edge viewLineL(0,&viewPointO,&viewPointL,0,0,0);
+		maze->Draw_View(maze->view_cell, viewLineR, viewLineL, focal_length);
 	}
 }
 

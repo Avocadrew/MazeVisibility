@@ -52,7 +52,7 @@ class MazeWindow : public Fl_Gl_Window {
 
 	public:
 		Maze	*maze;	// The maze to work with
-
+		Cell* viewCell;
 	private:
 		bool  down;		// True if the mouse button is down, false otherwise.
 		int	x_last;	// The location of the most recent mouse event
