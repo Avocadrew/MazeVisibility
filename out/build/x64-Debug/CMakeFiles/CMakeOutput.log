@@ -50,16 +50,16 @@ The CXX compiler identification is MSVC, found in "D:/台科上課資料/大四�
 Detecting C compiler ABI info compiled with the following output:
 Change Dir: D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility/out/build/x64-Debug/CMakeFiles/CMakeTmp
 
-Run Build Command(s):E:/Program Files/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_e7491 && [1/2] Building C object CMakeFiles\cmTC_e7491.dir\CMakeCCompilerABI.c.obj
-[2/2] Linking C executable cmTC_e7491.exe
+Run Build Command(s):E:/Program Files/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_6cab4 && [1/2] Building C object CMakeFiles\cmTC_6cab4.dir\CMakeCCompilerABI.c.obj
+[2/2] Linking C executable cmTC_6cab4.exe
 
 
 
 Detecting CXX compiler ABI info compiled with the following output:
 Change Dir: D:/台科上課資料/大四上/CS3026 電腦圖學導論_賴祐吉/MazeVisibility/out/build/x64-Debug/CMakeFiles/CMakeTmp
 
-Run Build Command(s):E:/Program Files/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_2f67e && [1/2] Building CXX object CMakeFiles\cmTC_2f67e.dir\CMakeCXXCompilerABI.cpp.obj
-[2/2] Linking CXX executable cmTC_2f67e.exe
+Run Build Command(s):E:/Program Files/Microsoft Visual Studio/2019/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe cmTC_bcb71 && [1/2] Building CXX object CMakeFiles\cmTC_bcb71.dir\CMakeCXXCompilerABI.cpp.obj
+[2/2] Linking CXX executable cmTC_bcb71.exe
 
 
 

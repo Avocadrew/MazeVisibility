@@ -96,7 +96,7 @@ class Maze {
 
 		// Draws the first-person view of the maze. It is passed the focal distance.
 		// THIS IS THE FUINCTION YOU SHOULD MODIFY.
-		void	Draw_View(Cell*, Edge, Edge, float);
+		void	Draw_View(Cell*, Edge, Edge);
 
 		// Save the maze to a file of the given name.
 		bool	Save(const char*);
@@ -151,6 +151,8 @@ class Maze {
 											// looking. Measured in degrees about the z
 											// axis, in the usual way.
 		float		viewer_fov;			// The horizontal field of view, in degrees.
+
+		float	focal_length;
 };
 
 

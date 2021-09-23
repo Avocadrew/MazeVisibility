@@ -623,15 +623,10 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 // * Draws the first-person view of the maze. It is passed the focal distance.
 //   THIS IS THE FUINCTION YOU SHOULD MODIFY.
 //======================================================================
-//**********************************************************************
-//
-// * Draws the first-person view of the maze. It is passed the focal distance.
-//   THIS IS THE FUINCTION YOU SHOULD MODIFY.
-//======================================================================
 void Maze::
-Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
+Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 	//Model Matrix
-	float perceptionMatrix[4][4] = {
+	float world2view[4][4] = {
 		{cos(Maze::To_Radians(this->viewer_dir)),	0,	-sin(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * cos(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -sin(Maze::To_Radians(this->viewer_dir))},
 		{0,		1,	0,		-this->viewer_posn[2]},
 		{-sin(Maze::To_Radians(this->viewer_dir)),	0,	-cos(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir))},
@@ -687,7 +682,7 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 			{edgePos[1][0], edgePos[1][1]}
 		};
 		//do clipping
-		if ((crossRight || crossLeft || inSight) && drawCell->edges[edgeNum]->curFrame!= this->frame_num) {
+		if ((crossRight || crossLeft || inSight) && drawCell->edges[edgeNum]->curFrame != this->frame_num) {
 			if (crossRight && crossLeft) {
 				if (edgeSide[0][1] == 1 || edgeSide[0][1] == 2) {
 					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
@@ -702,7 +697,7 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 			}
-			if (crossRight && !crossLeft) {
+			if (crossRight == true && crossLeft == false) {
 				if (edgeSide[0][1] == 0 || edgeSide[0][1] == 2 && edgeSide[1][1] == 1) {
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
@@ -712,7 +707,7 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 				}
 			}
-			if (!crossRight && crossLeft) {
+			if (crossRight == false && crossLeft == true) {
 				if (edgeSide[0][0] == 1 || edgeSide[0][0] == 2 && edgeSide[1][0] == 0) {
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
@@ -729,50 +724,51 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 			//draw wall
 			drawCell->edges[edgeNum]->curFrame = this->frame_num;
 			if (drawCell->edges[edgeNum]->opaque) {
-				float transPos[4][4] = {
+				float worldPos[4][4] = {
 					{clipPos[0][1], clipPos[0][1],clipPos[1][1],clipPos[1][1]},
 					{1,-1,1,-1},
 					{clipPos[0][0], clipPos[0][0],clipPos[1][0],clipPos[1][0]},
 					{1,1,1,1}
 				};
-				float drawPos[4][4] = { {0} ,{0} };
+				float viewPos[4][4] = { {0} ,{0} };
+				float screenPos[4][4] = { {0},{0} };
 				for (int i = 0; i < 4; i++)
 				{
 					for (int j = 0; j < 4; j++)
 					{
 						for (int k = 0; k < 4; k++)
 						{
-							drawPos[i][j] += perceptionMatrix[j][k] * transPos[k][i];
+							viewPos[i][j] += world2view[j][k] * worldPos[k][i];
 						}
+						screenPos[i][j] = viewPos[i][j];
 					}
 				}
-					
 				for (int i = 0; i < 4; i++) {
-					drawPos[i][0] *= focal_length / drawPos[i][2];
-					drawPos[i][1] *= focal_length / drawPos[i][2];
+					screenPos[i][0] *= focal_length / viewPos[i][2];
+					screenPos[i][1] *= focal_length / viewPos[i][2];
 				}
 				glBegin(GL_QUADS);
 				glColor3fv(drawCell->edges[edgeNum]->color);
-				glVertex2fv(drawPos[0]);
-				glVertex2fv(drawPos[1]);
-				glVertex2fv(drawPos[3]);
-				glVertex2fv(drawPos[2]);
+				glVertex2fv(screenPos[0]);
+				glVertex2fv(screenPos[1]);
+				glVertex2fv(screenPos[3]);
+				glVertex2fv(screenPos[2]);
 				glEnd();
 			}
 			else {
 				if (drawCell->edges[edgeNum]->Neighbor(drawCell)) {
-					Vertex viewPointO(0, this->viewer_posn[0], this->viewer_posn[1]);
-					Vertex nextViewPointR(0, clipPos[1][0], clipPos[1][1]);
-					Vertex nextViewPointL(0, clipPos[0][0], clipPos[0][1]);
+					Vertex curPos(0, this->viewer_posn[0], this->viewer_posn[1]);
+					Vertex viewClipR(0, clipPos[1][0], clipPos[1][1]);
+					Vertex viewClipL(0, clipPos[0][0], clipPos[0][1]);
 					if ((crossParams[0][1] > 0 && crossParams[0][0] > 0 && crossParams[1][1] < crossParams[1][0]) || (!(crossParams[0][1] > 0 && crossParams[0][0] > 0) && crossParams[1][1] > crossParams[1][0])) {
-						nextViewPointR.posn[0] = clipPos[0][0];
-						nextViewPointR.posn[1] = clipPos[0][1];
-						nextViewPointL.posn[0] = clipPos[1][0];
-						nextViewPointL.posn[1] = clipPos[1][1];
+						viewClipR.posn[0] = clipPos[0][0];
+						viewClipR.posn[1] = clipPos[0][1];
+						viewClipL.posn[0] = clipPos[1][0];
+						viewClipL.posn[1] = clipPos[1][1];
 					}
-					Edge nextViewLineR(0, &viewPointO, &nextViewPointR, 0, 0, 0);
-					Edge nextViewLineL(0, &viewPointO, &nextViewPointL, 0, 0, 0);
-					Draw_View(drawCell->edges[edgeNum]->Neighbor(drawCell), nextViewLineR, nextViewLineL, focal_length);
+					Edge viewAngleR(0, &curPos, &viewClipR, 0, 0, 0);
+					Edge viewAngleL(0, &curPos, &viewClipL, 0, 0, 0);
+					Draw_View(drawCell->edges[edgeNum]->Neighbor(drawCell), viewAngleR, viewAngleL);
 				}
 			}
 		}

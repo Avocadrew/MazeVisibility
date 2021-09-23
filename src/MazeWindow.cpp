@@ -67,7 +67,6 @@ void MazeWindow::
 draw(void)
 //=========================================================================
 {
-	float   focal_length;
 
 	if (!valid()) {
 		// The OpenGL context may have been changed
@@ -112,7 +111,7 @@ draw(void)
 		// field of view and the size of the image in view space. Note
 		// the static member function of the Maze class for converting
 		// radians to degrees. There is also one defined for going backwards.
-		focal_length = w()
+		maze->focal_length = w()
 			/ (float)(2.0 * tan(Maze::To_Radians(maze->viewer_fov) * 0.5));
 
 		// Draw the 3D view of the maze (the visible walls.) You write this.
@@ -123,12 +122,12 @@ draw(void)
 		if (viewCell != maze->view_cell) {
 			viewCell = maze->view_cell;
 		}
-		Vertex viewPointO(0,maze->viewer_posn[0],maze->viewer_posn[1]);
-		Vertex viewPointR(0,maze->viewer_posn[0]+focal_length*cos(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)),maze->viewer_posn[1]+focal_length*sin(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)));
-		Vertex viewPointL(0,maze->viewer_posn[0]+focal_length*cos(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)),maze->viewer_posn[1]+focal_length*sin(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)));
-		Edge viewLineR(0,&viewPointO,&viewPointR,0,0,0);
-		Edge viewLineL(0,&viewPointO,&viewPointL,0,0,0);
-		maze->Draw_View(maze->view_cell, viewLineR, viewLineL, focal_length);
+		Vertex curPos(0,maze->viewer_posn[0],maze->viewer_posn[1]);
+		Vertex viewClipR(0,maze->viewer_posn[0]+ maze->focal_length*cos(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)),maze->viewer_posn[1]+ maze->focal_length*sin(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)));
+		Vertex viewClipL(0,maze->viewer_posn[0]+ maze->focal_length*cos(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)),maze->viewer_posn[1]+ maze->focal_length*sin(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)));
+		Edge viewAngleR(0,&curPos,&viewClipR,0,0,0);
+		Edge viewAngleL(0,&curPos,&viewClipL,0,0,0);
+		maze->Draw_View(maze->view_cell, viewAngleR, viewAngleL);
 	}
 }
 
