@@ -21,6 +21,7 @@
 #include <FL/Fl.h>
 #include <FL/fl_draw.h>
 #include <GL/glu.h>
+#include <iostream>
 
 const char Maze::X = 0;
 const char Maze::Y = 1;
@@ -624,9 +625,10 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 //   THIS IS THE FUINCTION YOU SHOULD MODIFY.
 //======================================================================
 void Maze::
-Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
+Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 	//Model Matrix
-	float world2view[4][4] = {
+	float world2view[4][4] = 
+	{
 		{cos(Maze::To_Radians(this->viewer_dir)),	0,	-sin(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * cos(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -sin(Maze::To_Radians(this->viewer_dir))},
 		{0,		1,	0,		-this->viewer_posn[2]},
 		{-sin(Maze::To_Radians(this->viewer_dir)),	0,	-cos(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir))},
@@ -650,7 +652,7 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 			{viewLineL.Point_Side(edgePos[1][0], edgePos[1][1]), viewLineR.Point_Side(edgePos[1][0], edgePos[1][1])}
 		};
 		//check orientation of clip
-		bool crossRight, crossLeft, inSight;
+		bool crossRight, crossLeft, onViewEdge;
 		if (.0f < crossParams[0][1] && .0f < crossParams[1][1] && crossParams[1][1] < 1.0f)
 		{
 			crossRight = true;
@@ -667,52 +669,63 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 		{
 			crossLeft = false;
 		}
-		//check if wall in sight
+		//check if edge is "on"
 		if ((edgeSide[0][1] == 0 || edgeSide[0][1] == 2) && (edgeSide[1][1] == 0 || edgeSide[1][1] == 2) && (edgeSide[0][0] == 1 || edgeSide[0][0] == 2) && (edgeSide[1][0] == 1 || edgeSide[1][0] == 2))
 		{
-			inSight = true;
+			onViewEdge = true;
 		}
 		else
 		{
-			inSight = false;
+			onViewEdge = false;
 		}
 
-		float clipPos[2][2] = {
+		float clipPos[2][2] = 
+		{
 			{edgePos[0][0], edgePos[0][1]},
 			{edgePos[1][0], edgePos[1][1]}
 		};
 		//do clipping
-		if ((crossRight || crossLeft || inSight) && drawCell->edges[edgeNum]->curFrame != this->frame_num) {
-			if (crossRight && crossLeft) {
-				if (edgeSide[0][1] == 1 || edgeSide[0][1] == 2) {
+		if ((crossRight || crossLeft || onViewEdge) && drawCell->edges[edgeNum]->curFrame != this->frame_num) 
+		{
+			if (crossRight == true && crossLeft == true) 
+			{
+				if (edgeSide[0][1] == 1 || edgeSide[0][1] == 2) 
+				{
 					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
-				else {
+				else 
+				{
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 			}
-			if (crossRight == true && crossLeft == false) {
-				if (edgeSide[0][1] == 0 || edgeSide[0][1] == 2 && edgeSide[1][1] == 1) {
+			if (crossRight == true && crossLeft == false) 
+			{
+				if (edgeSide[0][1] == 0 || edgeSide[0][1] == 2 && edgeSide[1][1] == 1)
+				{
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 				}
-				else {
+				else
+				{
 					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 				}
 			}
-			if (crossRight == false && crossLeft == true) {
-				if (edgeSide[0][0] == 1 || edgeSide[0][0] == 2 && edgeSide[1][0] == 0) {
+			if (crossRight == false && crossLeft == true)
+			{
+				if (edgeSide[0][0] == 1 || edgeSide[0][0] == 2 && edgeSide[1][0] == 0) 
+				{
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
-				else {
+				else 
+				{
 					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
@@ -723,8 +736,10 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 			}
 			//draw wall
 			drawCell->edges[edgeNum]->curFrame = this->frame_num;
-			if (drawCell->edges[edgeNum]->opaque) {
-				float worldPos[4][4] = {
+			if (drawCell->edges[edgeNum]->opaque) 
+			{
+				float worldPos[4][4] = 
+				{
 					{clipPos[0][1], clipPos[0][1],clipPos[1][1],clipPos[1][1]},
 					{1,-1,1,-1},
 					{clipPos[0][0], clipPos[0][0],clipPos[1][0],clipPos[1][0]},
@@ -743,7 +758,8 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 						screenPos[i][j] = viewPos[i][j];
 					}
 				}
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < 4; i++)
+				{
 					screenPos[i][0] *= focal_length / viewPos[i][2];
 					screenPos[i][1] *= focal_length / viewPos[i][2];
 				}
@@ -754,13 +770,19 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 				glVertex2fv(screenPos[3]);
 				glVertex2fv(screenPos[2]);
 				glEnd();
+				std::cout << "Draw" << std::endl;
 			}
-			else {
-				if (drawCell->edges[edgeNum]->Neighbor(drawCell)) {
+			else 
+			{
+				std::cout << "Else" << std::endl;
+				if (drawCell->edges[edgeNum]->Neighbor(drawCell))
+				{
+					std::cout << "Neighbour" << std::endl;
 					Vertex curPos(0, this->viewer_posn[0], this->viewer_posn[1]);
 					Vertex viewClipR(0, clipPos[1][0], clipPos[1][1]);
 					Vertex viewClipL(0, clipPos[0][0], clipPos[0][1]);
-					if ((crossParams[0][1] > 0 && crossParams[0][0] > 0 && crossParams[1][1] < crossParams[1][0]) || (!(crossParams[0][1] > 0 && crossParams[0][0] > 0) && crossParams[1][1] > crossParams[1][0])) {
+					if ((crossParams[0][1] > 0 && crossParams[0][0] > 0 && crossParams[1][1] < crossParams[1][0]) || (!(crossParams[0][1] > 0 && crossParams[0][0] > 0) && crossParams[1][1] > crossParams[1][0]))
+					{
 						viewClipR.posn[0] = clipPos[0][0];
 						viewClipR.posn[1] = clipPos[0][1];
 						viewClipL.posn[0] = clipPos[1][0];
@@ -768,7 +790,7 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 					}
 					Edge viewAngleR(0, &curPos, &viewClipR, 0, 0, 0);
 					Edge viewAngleL(0, &curPos, &viewClipL, 0, 0, 0);
-					Draw_View(drawCell->edges[edgeNum]->Neighbor(drawCell), viewAngleR, viewAngleL);
+					Draw_Cell(drawCell->edges[edgeNum]->Neighbor(drawCell), viewAngleR, viewAngleL);
 				}
 			}
 		}

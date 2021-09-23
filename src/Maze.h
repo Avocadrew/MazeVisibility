@@ -96,7 +96,7 @@ class Maze {
 
 		// Draws the first-person view of the maze. It is passed the focal distance.
 		// THIS IS THE FUINCTION YOU SHOULD MODIFY.
-		void	Draw_View(Cell*, Edge, Edge);
+		void	Draw_Cell(Cell*, Edge, Edge);
 
 		// Save the maze to a file of the given name.
 		bool	Save(const char*);

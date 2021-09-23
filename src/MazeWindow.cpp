@@ -19,6 +19,7 @@
 
 #include "MazeWindow.h"
 #include "Maze.h"
+#include <iostream>
 #include <Fl/math.h>
 #include <Fl/gl.h>
 #include <GL/glu.h>
@@ -107,6 +108,7 @@ draw(void)
 
 
 	if (maze) {
+		
 		// Set the focal length. We can do this because we know the
 		// field of view and the size of the image in view space. Note
 		// the static member function of the Maze class for converting
@@ -119,7 +121,9 @@ draw(void)
 		// transformations and projection is contained in the Maze class,
 		// plus the focal length.
 		maze->frame_num++;
-		if (viewCell != maze->view_cell) {
+		std::cout << maze->frame_num << std::endl;
+		if (viewCell != maze->view_cell) 
+		{
 			viewCell = maze->view_cell;
 		}
 		Vertex curPos(0,maze->viewer_posn[0],maze->viewer_posn[1]);
@@ -127,7 +131,7 @@ draw(void)
 		Vertex viewClipL(0,maze->viewer_posn[0]+ maze->focal_length*cos(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)),maze->viewer_posn[1]+ maze->focal_length*sin(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)));
 		Edge viewAngleR(0,&curPos,&viewClipR,0,0,0);
 		Edge viewAngleL(0,&curPos,&viewClipL,0,0,0);
-		maze->Draw_View(maze->view_cell, viewAngleR, viewAngleL);
+		maze->Draw_Cell(maze->view_cell, viewAngleR, viewAngleL);
 	}
 }
 
