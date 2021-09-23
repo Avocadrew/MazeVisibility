@@ -722,14 +722,13 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 			}
-			if ((clipPos[0][0] - clipPos[1][0]) * (clipPos[0][0] - clipPos[1][0]) < 0.000000001 && (clipPos[0][1] - clipPos[1][1]) * (clipPos[0][1] - clipPos[1][1]) < 0.000000001)
+			if ((clipPos[0][0] - clipPos[1][0]) * (clipPos[0][0] - clipPos[1][0]) < 0.001f && (clipPos[0][1] - clipPos[1][1]) * (clipPos[0][1] - clipPos[1][1]) < 0.001f)
 			{
 				continue;
 			}
 			//draw wall
 			drawCell->edges[edgeNum]->curFrame = this->frame_num;
 			if (drawCell->edges[edgeNum]->opaque) {
-				
 				float transPos[4][4] = {
 					{clipPos[0][1], clipPos[0][1],clipPos[1][1],clipPos[1][1]},
 					{1,-1,1,-1},
@@ -743,7 +742,7 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 					{
 						for (int k = 0; k < 4; k++)
 						{
-							drawPos[i][j] = perceptionMatrix[j][0] * transPos[0][i] + perceptionMatrix[j][1] * transPos[1][i] + perceptionMatrix[j][2] * transPos[2][i] + perceptionMatrix[j][3] * transPos[3][i];
+							drawPos[i][j] += perceptionMatrix[j][k] * transPos[k][i];
 						}
 					}
 				}
