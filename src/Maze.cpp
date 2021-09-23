@@ -623,14 +623,19 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 // * Draws the first-person view of the maze. It is passed the focal distance.
 //   THIS IS THE FUINCTION YOU SHOULD MODIFY.
 //======================================================================
+//**********************************************************************
+//
+// * Draws the first-person view of the maze. It is passed the focal distance.
+//   THIS IS THE FUINCTION YOU SHOULD MODIFY.
+//======================================================================
 void Maze::
 Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 	//Model Matrix
-	float mMat[16] = {
-		cos(Maze::To_Radians(this->viewer_dir)),	0,	-sin(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * cos(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -sin(Maze::To_Radians(this->viewer_dir)),
-		0,		1,	0,		-this->viewer_posn[2],
-		-sin(Maze::To_Radians(this->viewer_dir)),	0,	-cos(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir)),
-		0,		0,	0,		1
+	float perceptionMatrix[4][4] = {
+		{cos(Maze::To_Radians(this->viewer_dir)),	0,	-sin(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * cos(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -sin(Maze::To_Radians(this->viewer_dir))},
+		{0,		1,	0,		-this->viewer_posn[2]},
+		{-sin(Maze::To_Radians(this->viewer_dir)),	0,	-cos(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir))},
+		{0,		0,	0,		1}
 	};
 	for (int edgeNum = 0; edgeNum < 4; edgeNum++) {
 		//patameters
@@ -676,61 +681,62 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 		{
 			inSight = false;
 		}
+
+		float clipPos[2][2] = {
+			{edgePos[0][0], edgePos[0][1]},
+			{edgePos[1][0], edgePos[1][1]}
+		};
 		//do clipping
-		if ((crossRight || crossLeft || inSight) && drawCell->edges[edgeNum]->drawFram != this->frame_num) {
+		if ((crossRight || crossLeft || inSight) && drawCell->edges[edgeNum]->curFrame!= this->frame_num) {
 			if (crossRight && crossLeft) {
 				if (edgeSide[0][1] == 1 || edgeSide[0][1] == 2) {
-					float tedgePos[2] = { edgePos[0][0],edgePos[0][1] };
-					edgePos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
-					edgePos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
-
-					edgePos[1][0] = tedgePos[0] + (edgePos[1][0] - tedgePos[0]) * crossParams[1][0];
-					edgePos[1][1] = tedgePos[1] + (edgePos[1][1] - tedgePos[1]) * crossParams[1][0];
+					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
+					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
+					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 				else {
-					float tedgePos[2] = { edgePos[1][0],edgePos[1][1] };
-					edgePos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
-					edgePos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
-
-					edgePos[0][0] = edgePos[0][0] + (tedgePos[0] - edgePos[0][0]) * crossParams[1][0];
-					edgePos[0][1] = edgePos[0][1] + (tedgePos[1] - edgePos[0][1]) * crossParams[1][0];
+					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
+					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
+					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 			}
 			if (crossRight && !crossLeft) {
 				if (edgeSide[0][1] == 0 || edgeSide[0][1] == 2 && edgeSide[1][1] == 1) {
-					edgePos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
-					edgePos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
+					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 				}
 				else {
-					edgePos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
-					edgePos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
+					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 				}
 			}
 			if (!crossRight && crossLeft) {
 				if (edgeSide[0][0] == 1 || edgeSide[0][0] == 2 && edgeSide[1][0] == 0) {
-					edgePos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
-					edgePos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
+					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
+					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 				else {
-					edgePos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
-					edgePos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
+					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
+					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 			}
-			if ((edgePos[0][0] - edgePos[1][0]) * (edgePos[0][0] - edgePos[1][0]) < 0.000000001 && (edgePos[0][1] - edgePos[1][1]) * (edgePos[0][1] - edgePos[1][1]) < 0.000000001)
+			if ((clipPos[0][0] - clipPos[1][0]) * (clipPos[0][0] - clipPos[1][0]) < 0.000000001 && (clipPos[0][1] - clipPos[1][1]) * (clipPos[0][1] - clipPos[1][1]) < 0.000000001)
 				continue;
 			//draw wall
-			drawCell->edges[edgeNum]->drawFram = this->frame_num;
+			drawCell->edges[edgeNum]->curFrame = this->frame_num;
 			if (drawCell->edges[edgeNum]->opaque) {
 				float sedgePos[4][4] = {
-					{edgePos[0][1], 1,edgePos[0][0],1},
-					{edgePos[0][1],-1,edgePos[0][0],1},
-					{edgePos[1][1], 1,edgePos[1][0],1},
-					{edgePos[1][1],-1,edgePos[1][0],1}
+					{clipPos[0][1], 1,clipPos[0][0],1},
+					{clipPos[0][1],-1,clipPos[0][0],1},
+					{clipPos[1][1], 1,clipPos[1][0],1},
+					{clipPos[1][1],-1,clipPos[1][0],1}
 				};
-				float sp2[4][4];
+				float sp2[4][4] = {0};
 				for (int i = 0; i < 4; i++) {
 					for (int j = 0; j < 4; j++) {
-						sp2[i][j] = mMat[j * 4 + 0] * sedgePos[i][0] + mMat[j * 4 + 1] * sedgePos[i][1] + mMat[j * 4 + 2] * sedgePos[i][2] + mMat[j * 4 + 3] * sedgePos[i][3];
+						sp2[i][j] = perceptionMatrix[j][0] * sedgePos[i][0] + perceptionMatrix[j][1] * sedgePos[i][1] + perceptionMatrix[j][2] * sedgePos[i][2] + perceptionMatrix[j][3] * sedgePos[i][3];
 					}
 				}
 				for (int i = 0; i < 4; i++) {
@@ -748,13 +754,13 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 			else {
 				if (drawCell->edges[edgeNum]->Neighbor(drawCell)) {
 					Vertex viewPointO(0, this->viewer_posn[0], this->viewer_posn[1]);
-					Vertex nextViewPointR(0, edgePos[1][0], edgePos[1][1]);
-					Vertex nextViewPointL(0, edgePos[0][0], edgePos[0][1]);
+					Vertex nextViewPointR(0, clipPos[1][0], clipPos[1][1]);
+					Vertex nextViewPointL(0, clipPos[0][0], clipPos[0][1]);
 					if ((crossParams[0][1] > 0 && crossParams[0][0] > 0 && crossParams[1][1] < crossParams[1][0]) || (!(crossParams[0][1] > 0 && crossParams[0][0] > 0) && crossParams[1][1] > crossParams[1][0])) {
-						nextViewPointR.posn[0] = edgePos[0][0];
-						nextViewPointR.posn[1] = edgePos[0][1];
-						nextViewPointL.posn[0] = edgePos[1][0];
-						nextViewPointL.posn[1] = edgePos[1][1];
+						nextViewPointR.posn[0] = clipPos[0][0];
+						nextViewPointR.posn[1] = clipPos[0][1];
+						nextViewPointL.posn[0] = clipPos[1][0];
+						nextViewPointL.posn[1] = clipPos[1][1];
 					}
 					Edge nextViewLineR(0, &viewPointO, &nextViewPointR, 0, 0, 0);
 					Edge nextViewLineL(0, &viewPointO, &nextViewPointL, 0, 0, 0);

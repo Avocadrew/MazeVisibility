@@ -77,7 +77,7 @@ class Edge {
     						// walked through, false otherwise.
 
     float	color[3]; // The color for this edge / wall.
-	unsigned int drawFram;
+	unsigned int curFrame;
 };
 
 #endif
