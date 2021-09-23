@@ -625,86 +625,112 @@ Draw_Map(int min_x, int min_y, int max_x, int max_y)
 //======================================================================
 void Maze::
 Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
-	float gCos = cos(Maze::To_Radians(this->viewer_dir));
-	float gSin = sin(Maze::To_Radians(this->viewer_dir));
-	float mMat[16] = {//model
-		gCos,	0,	-gSin,	-this->viewer_posn[1] * gCos - this->viewer_posn[0] * -gSin,
+	//Model Matrix
+	float mMat[16] = {
+		cos(Maze::To_Radians(this->viewer_dir)),	0,	-sin(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * cos(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -sin(Maze::To_Radians(this->viewer_dir)),
 		0,		1,	0,		-this->viewer_posn[2],
-		-gSin,	0,	-gCos,	-this->viewer_posn[1] * -gSin - this->viewer_posn[0] * -gCos,
+		-sin(Maze::To_Radians(this->viewer_dir)),	0,	-cos(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir)),
 		0,		0,	0,		1
 	};
-	for (int edgeIndex = 0; edgeIndex < 4; edgeIndex++) {
-		float crossParR1 = LineSeg(&viewLineR).Cross_Param(LineSeg(drawCell->edges[edgeIndex]));
-		float crossParR2 = LineSeg(drawCell->edges[edgeIndex]).Cross_Param(LineSeg(&viewLineR));
-		float crossParL1 = LineSeg(&viewLineL).Cross_Param(LineSeg(drawCell->edges[edgeIndex]));
-		float crossParL2 = LineSeg(drawCell->edges[edgeIndex]).Cross_Param(LineSeg(&viewLineL));
-		float p[2][2];
-		p[0][0] = drawCell->edges[edgeIndex]->endpoints[0]->posn[0];
-		p[0][1] = drawCell->edges[edgeIndex]->endpoints[0]->posn[1];
-		p[1][0] = drawCell->edges[edgeIndex]->endpoints[1]->posn[0];
-		p[1][1] = drawCell->edges[edgeIndex]->endpoints[1]->posn[1];
-		int sideRS = viewLineR.Point_Side(p[0][0], p[0][1]);
-		int sideRE = viewLineR.Point_Side(p[1][0], p[1][1]);
-		int sideLS = viewLineL.Point_Side(p[0][0], p[0][1]);
-		int sideLE = viewLineL.Point_Side(p[1][0], p[1][1]);
-		bool crossR = 0. < crossParR1 && 0. < crossParR2 && crossParR2 < 1.;
-		bool crossL = 0. < crossParL1 && 0. < crossParL2 && crossParL2 < 1.;
-		bool includeRL = (sideRS == 0 || sideRS == 2) && (sideRE == 0 || sideRE == 2) && (sideLS == 1 || sideLS == 2) && (sideLE == 1 || sideLE == 2);
-		if ((crossR || crossL || includeRL) && drawCell->edges[edgeIndex]->drawFram != this->frame_num) {
-			//clip wall
-			if (crossR && crossL) {
-				if (sideRS == 1 || sideRS == 2) {
-					float tp[2] = { p[0][0],p[0][1] };
-					p[0][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
-					p[0][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
+	for (int edgeNum = 0; edgeNum < 4; edgeNum++) {
+		//patameters
+		float crossParams[2][2] =
+		{
+			{LineSeg(&viewLineL).Cross_Param(LineSeg(drawCell->edges[edgeNum])), LineSeg(&viewLineR).Cross_Param(LineSeg(drawCell->edges[edgeNum]))},
+			{LineSeg(drawCell->edges[edgeNum]).Cross_Param(LineSeg(&viewLineL)), LineSeg(drawCell->edges[edgeNum]).Cross_Param(LineSeg(&viewLineR))}
+		};
+		float edgePos[2][2] =
+		{
+			{drawCell->edges[edgeNum]->endpoints[0]->posn[0], drawCell->edges[edgeNum]->endpoints[0]->posn[1]},
+			{drawCell->edges[edgeNum]->endpoints[1]->posn[0], drawCell->edges[edgeNum]->endpoints[1]->posn[1]}
+		};
+		int edgeSide[2][2] =
+		{
+			{viewLineL.Point_Side(edgePos[0][0], edgePos[0][1]), viewLineR.Point_Side(edgePos[0][0], edgePos[0][1])},
+			{viewLineL.Point_Side(edgePos[1][0], edgePos[1][1]), viewLineR.Point_Side(edgePos[1][0], edgePos[1][1])}
+		};
+		//check orientation of clip
+		bool crossRight, crossLeft, inSight;
+		if (.0f < crossParams[0][1] && .0f < crossParams[1][1] && crossParams[1][1] < 1.0f)
+		{
+			crossRight = true;
+		}
+		else
+		{
+			crossRight = false;
+		}
+		if (.0f < crossParams[0][0] && .0f < crossParams[1][0] && crossParams[1][0] < 1.0f)
+		{
+			crossLeft = true;
+		}
+		else
+		{
+			crossLeft = false;
+		}
+		//check if wall in sight
+		if ((edgeSide[0][1] == 0 || edgeSide[0][1] == 2) && (edgeSide[1][1] == 0 || edgeSide[1][1] == 2) && (edgeSide[0][0] == 1 || edgeSide[0][0] == 2) && (edgeSide[1][0] == 1 || edgeSide[1][0] == 2))
+		{
+			inSight = true;
+		}
+		else
+		{
+			inSight = false;
+		}
+		//do clipping
+		if ((crossRight || crossLeft || inSight) && drawCell->edges[edgeNum]->drawFram != this->frame_num) {
+			if (crossRight && crossLeft) {
+				if (edgeSide[0][1] == 1 || edgeSide[0][1] == 2) {
+					float tedgePos[2] = { edgePos[0][0],edgePos[0][1] };
+					edgePos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					edgePos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 
-					p[1][0] = tp[0] + (p[1][0] - tp[0]) * crossParL2;
-					p[1][1] = tp[1] + (p[1][1] - tp[1]) * crossParL2;
+					edgePos[1][0] = tedgePos[0] + (edgePos[1][0] - tedgePos[0]) * crossParams[1][0];
+					edgePos[1][1] = tedgePos[1] + (edgePos[1][1] - tedgePos[1]) * crossParams[1][0];
 				}
 				else {
-					float tp[2] = { p[1][0],p[1][1] };
-					p[1][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
-					p[1][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
+					float tedgePos[2] = { edgePos[1][0],edgePos[1][1] };
+					edgePos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					edgePos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 
-					p[0][0] = p[0][0] + (tp[0] - p[0][0]) * crossParL2;
-					p[0][1] = p[0][1] + (tp[1] - p[0][1]) * crossParL2;
+					edgePos[0][0] = edgePos[0][0] + (tedgePos[0] - edgePos[0][0]) * crossParams[1][0];
+					edgePos[0][1] = edgePos[0][1] + (tedgePos[1] - edgePos[0][1]) * crossParams[1][0];
 				}
 			}
-			if (crossR && !crossL) {
-				if (sideRS == 0 || sideRS == 2 && sideRE == 1) {
-					p[1][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
-					p[1][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
+			if (crossRight && !crossLeft) {
+				if (edgeSide[0][1] == 0 || edgeSide[0][1] == 2 && edgeSide[1][1] == 1) {
+					edgePos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					edgePos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 				}
 				else {
-					p[0][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParR2;
-					p[0][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParR2;
+					edgePos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
+					edgePos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
 				}
 			}
-			if (!crossR && crossL) {
-				if (sideLS == 1 || sideLS == 2 && sideLE == 0) {
-					p[1][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParL2;
-					p[1][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParL2;
+			if (!crossRight && crossLeft) {
+				if (edgeSide[0][0] == 1 || edgeSide[0][0] == 2 && edgeSide[1][0] == 0) {
+					edgePos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
+					edgePos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 				else {
-					p[0][0] = p[0][0] + (p[1][0] - p[0][0]) * crossParL2;
-					p[0][1] = p[0][1] + (p[1][1] - p[0][1]) * crossParL2;
+					edgePos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
+					edgePos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
 				}
 			}
-			if ((p[0][0] - p[1][0]) * (p[0][0] - p[1][0]) < 0.000000001 && (p[0][1] - p[1][1]) * (p[0][1] - p[1][1]) < 0.000000001)
+			if ((edgePos[0][0] - edgePos[1][0]) * (edgePos[0][0] - edgePos[1][0]) < 0.000000001 && (edgePos[0][1] - edgePos[1][1]) * (edgePos[0][1] - edgePos[1][1]) < 0.000000001)
 				continue;
 			//draw wall
-			drawCell->edges[edgeIndex]->drawFram = this->frame_num;
-			if (drawCell->edges[edgeIndex]->opaque) {
-				float sp[4][4] = {
-					{p[0][1], 1,p[0][0],1},
-					{p[0][1],-1,p[0][0],1},
-					{p[1][1], 1,p[1][0],1},
-					{p[1][1],-1,p[1][0],1}
+			drawCell->edges[edgeNum]->drawFram = this->frame_num;
+			if (drawCell->edges[edgeNum]->opaque) {
+				float sedgePos[4][4] = {
+					{edgePos[0][1], 1,edgePos[0][0],1},
+					{edgePos[0][1],-1,edgePos[0][0],1},
+					{edgePos[1][1], 1,edgePos[1][0],1},
+					{edgePos[1][1],-1,edgePos[1][0],1}
 				};
 				float sp2[4][4];
 				for (int i = 0; i < 4; i++) {
 					for (int j = 0; j < 4; j++) {
-						sp2[i][j] = mMat[j * 4 + 0] * sp[i][0] + mMat[j * 4 + 1] * sp[i][1] + mMat[j * 4 + 2] * sp[i][2] + mMat[j * 4 + 3] * sp[i][3];
+						sp2[i][j] = mMat[j * 4 + 0] * sedgePos[i][0] + mMat[j * 4 + 1] * sedgePos[i][1] + mMat[j * 4 + 2] * sedgePos[i][2] + mMat[j * 4 + 3] * sedgePos[i][3];
 					}
 				}
 				for (int i = 0; i < 4; i++) {
@@ -712,7 +738,7 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 					sp2[i][1] *= focal_length / sp2[i][2];
 				}
 				glBegin(GL_QUADS);
-				glColor3fv(drawCell->edges[edgeIndex]->color);
+				glColor3fv(drawCell->edges[edgeNum]->color);
 				glVertex2fv(sp2[0]);
 				glVertex2fv(sp2[1]);
 				glVertex2fv(sp2[3]);
@@ -720,19 +746,19 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 				glEnd();
 			}
 			else {
-				if (drawCell->edges[edgeIndex]->Neighbor(drawCell)) {
+				if (drawCell->edges[edgeNum]->Neighbor(drawCell)) {
 					Vertex viewPointO(0, this->viewer_posn[0], this->viewer_posn[1]);
-					Vertex nextViewPointR(0, p[1][0], p[1][1]);
-					Vertex nextViewPointL(0, p[0][0], p[0][1]);
-					if ((crossParR1 > 0 && crossParL1 > 0 && crossParR2 < crossParL2) || (!(crossParR1 > 0 && crossParL1 > 0) && crossParR2 > crossParL2)) {
-						nextViewPointR.posn[0] = p[0][0];
-						nextViewPointR.posn[1] = p[0][1];
-						nextViewPointL.posn[0] = p[1][0];
-						nextViewPointL.posn[1] = p[1][1];
+					Vertex nextViewPointR(0, edgePos[1][0], edgePos[1][1]);
+					Vertex nextViewPointL(0, edgePos[0][0], edgePos[0][1]);
+					if ((crossParams[0][1] > 0 && crossParams[0][0] > 0 && crossParams[1][1] < crossParams[1][0]) || (!(crossParams[0][1] > 0 && crossParams[0][0] > 0) && crossParams[1][1] > crossParams[1][0])) {
+						nextViewPointR.posn[0] = edgePos[0][0];
+						nextViewPointR.posn[1] = edgePos[0][1];
+						nextViewPointL.posn[0] = edgePos[1][0];
+						nextViewPointL.posn[1] = edgePos[1][1];
 					}
 					Edge nextViewLineR(0, &viewPointO, &nextViewPointR, 0, 0, 0);
 					Edge nextViewLineL(0, &viewPointO, &nextViewPointL, 0, 0, 0);
-					Draw_View(drawCell->edges[edgeIndex]->Neighbor(drawCell), nextViewLineR, nextViewLineL, focal_length);
+					Draw_View(drawCell->edges[edgeNum]->Neighbor(drawCell), nextViewLineR, nextViewLineL, focal_length);
 				}
 			}
 		}
