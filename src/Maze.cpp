@@ -723,32 +723,41 @@ Draw_View(Cell* drawCell, Edge viewLineR, Edge viewLineL, float focal_length) {
 				}
 			}
 			if ((clipPos[0][0] - clipPos[1][0]) * (clipPos[0][0] - clipPos[1][0]) < 0.000000001 && (clipPos[0][1] - clipPos[1][1]) * (clipPos[0][1] - clipPos[1][1]) < 0.000000001)
+			{
 				continue;
+			}
 			//draw wall
 			drawCell->edges[edgeNum]->curFrame = this->frame_num;
 			if (drawCell->edges[edgeNum]->opaque) {
-				float sedgePos[4][4] = {
-					{clipPos[0][1], 1,clipPos[0][0],1},
-					{clipPos[0][1],-1,clipPos[0][0],1},
-					{clipPos[1][1], 1,clipPos[1][0],1},
-					{clipPos[1][1],-1,clipPos[1][0],1}
+				
+				float transPos[4][4] = {
+					{clipPos[0][1], clipPos[0][1],clipPos[1][1],clipPos[1][1]},
+					{1,-1,1,-1},
+					{clipPos[0][0], clipPos[0][0],clipPos[1][0],clipPos[1][0]},
+					{1,1,1,1}
 				};
-				float sp2[4][4] = {0};
-				for (int i = 0; i < 4; i++) {
-					for (int j = 0; j < 4; j++) {
-						sp2[i][j] = perceptionMatrix[j][0] * sedgePos[i][0] + perceptionMatrix[j][1] * sedgePos[i][1] + perceptionMatrix[j][2] * sedgePos[i][2] + perceptionMatrix[j][3] * sedgePos[i][3];
+				float drawPos[4][4] = { {0} ,{0} };
+				for (int i = 0; i < 4; i++)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						for (int k = 0; k < 4; k++)
+						{
+							drawPos[i][j] = perceptionMatrix[j][0] * transPos[0][i] + perceptionMatrix[j][1] * transPos[1][i] + perceptionMatrix[j][2] * transPos[2][i] + perceptionMatrix[j][3] * transPos[3][i];
+						}
 					}
 				}
+					
 				for (int i = 0; i < 4; i++) {
-					sp2[i][0] *= focal_length / sp2[i][2];
-					sp2[i][1] *= focal_length / sp2[i][2];
+					drawPos[i][0] *= focal_length / drawPos[i][2];
+					drawPos[i][1] *= focal_length / drawPos[i][2];
 				}
 				glBegin(GL_QUADS);
 				glColor3fv(drawCell->edges[edgeNum]->color);
-				glVertex2fv(sp2[0]);
-				glVertex2fv(sp2[1]);
-				glVertex2fv(sp2[3]);
-				glVertex2fv(sp2[2]);
+				glVertex2fv(drawPos[0]);
+				glVertex2fv(drawPos[1]);
+				glVertex2fv(drawPos[3]);
+				glVertex2fv(drawPos[2]);
 				glEnd();
 			}
 			else {
