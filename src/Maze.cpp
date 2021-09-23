@@ -634,19 +634,19 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 		{-sin(Maze::To_Radians(this->viewer_dir)),	0,	-cos(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir))},
 		{0,		0,	0,		1}
 	};
-	for (int edgeNum = 0; edgeNum < 4; edgeNum++) {
+	for (int edgeIndex = 0; edgeIndex < 4; edgeIndex++) {
 		//patameters
 		float crossParams[2][2] =
 		{
-			{LineSeg(&viewLineL).Cross_Param(LineSeg(drawCell->edges[edgeNum])), LineSeg(&viewLineR).Cross_Param(LineSeg(drawCell->edges[edgeNum]))},
-			{LineSeg(drawCell->edges[edgeNum]).Cross_Param(LineSeg(&viewLineL)), LineSeg(drawCell->edges[edgeNum]).Cross_Param(LineSeg(&viewLineR))}
+			{LineSeg(&viewLineL).Cross_Param(LineSeg(drawCell->edges[edgeIndex])), LineSeg(&viewLineR).Cross_Param(LineSeg(drawCell->edges[edgeIndex]))},
+			{LineSeg(drawCell->edges[edgeIndex]).Cross_Param(LineSeg(&viewLineL)), LineSeg(drawCell->edges[edgeIndex]).Cross_Param(LineSeg(&viewLineR))}
 		};
 		float edgePos[2][2] =
 		{
-			{drawCell->edges[edgeNum]->endpoints[0]->posn[0], drawCell->edges[edgeNum]->endpoints[0]->posn[1]},
-			{drawCell->edges[edgeNum]->endpoints[1]->posn[0], drawCell->edges[edgeNum]->endpoints[1]->posn[1]}
+			{drawCell->edges[edgeIndex]->endpoints[0]->posn[0], drawCell->edges[edgeIndex]->endpoints[0]->posn[1]},
+			{drawCell->edges[edgeIndex]->endpoints[1]->posn[0], drawCell->edges[edgeIndex]->endpoints[1]->posn[1]}
 		};
-		int edgeSide[2][2] =
+		int viewEdge[2][2] =
 		{
 			{viewLineL.Point_Side(edgePos[0][0], edgePos[0][1]), viewLineR.Point_Side(edgePos[0][0], edgePos[0][1])},
 			{viewLineL.Point_Side(edgePos[1][0], edgePos[1][1]), viewLineR.Point_Side(edgePos[1][0], edgePos[1][1])}
@@ -670,7 +670,7 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 			crossLeft = false;
 		}
 		//check if edge is "on"
-		if ((edgeSide[0][1] == 0 || edgeSide[0][1] == 2) && (edgeSide[1][1] == 0 || edgeSide[1][1] == 2) && (edgeSide[0][0] == 1 || edgeSide[0][0] == 2) && (edgeSide[1][0] == 1 || edgeSide[1][0] == 2))
+		if ((viewEdge[0][1] == 0 || viewEdge[0][1] == 2) && (viewEdge[1][1] == 0 || viewEdge[1][1] == 2) && (viewEdge[0][0] == 1 || viewEdge[0][0] == 2) && (viewEdge[1][0] == 1 || viewEdge[1][0] == 2))
 		{
 			onViewEdge = true;
 		}
@@ -685,11 +685,11 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 			{edgePos[1][0], edgePos[1][1]}
 		};
 		//do clipping
-		if ((crossRight || crossLeft || onViewEdge) && drawCell->edges[edgeNum]->curFrame != this->frame_num) 
+		if ((crossRight || crossLeft || onViewEdge) && drawCell->edges[edgeIndex]->curFrame != this->frame_num) 
 		{
 			if (crossRight == true && crossLeft == true) 
 			{
-				if (edgeSide[0][1] == 1 || edgeSide[0][1] == 2) 
+				if (viewEdge[0][1] == 1 || viewEdge[0][1] == 2) 
 				{
 					clipPos[0][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
 					clipPos[0][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
@@ -706,7 +706,7 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 			}
 			if (crossRight == true && crossLeft == false) 
 			{
-				if (edgeSide[0][1] == 0 || edgeSide[0][1] == 2 && edgeSide[1][1] == 1)
+				if (viewEdge[0][1] == 0 || viewEdge[0][1] == 2 && viewEdge[1][1] == 1)
 				{
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][1];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][1];
@@ -719,7 +719,7 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 			}
 			if (crossRight == false && crossLeft == true)
 			{
-				if (edgeSide[0][0] == 1 || edgeSide[0][0] == 2 && edgeSide[1][0] == 0) 
+				if (viewEdge[0][0] == 1 || viewEdge[0][0] == 2 && viewEdge[1][0] == 0) 
 				{
 					clipPos[1][0] = edgePos[0][0] + (edgePos[1][0] - edgePos[0][0]) * crossParams[1][0];
 					clipPos[1][1] = edgePos[0][1] + (edgePos[1][1] - edgePos[0][1]) * crossParams[1][0];
@@ -735,8 +735,8 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 				continue;
 			}
 			//draw wall
-			drawCell->edges[edgeNum]->curFrame = this->frame_num;
-			if (drawCell->edges[edgeNum]->opaque) 
+			drawCell->edges[edgeIndex]->curFrame = this->frame_num;
+			if (drawCell->edges[edgeIndex]->opaque) 
 			{
 				float worldPos[4][4] = 
 				{
@@ -764,7 +764,7 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 					screenPos[i][1] *= focal_length / viewPos[i][2];
 				}
 				glBegin(GL_QUADS);
-				glColor3fv(drawCell->edges[edgeNum]->color);
+				glColor3fv(drawCell->edges[edgeIndex]->color);
 				glVertex2fv(screenPos[0]);
 				glVertex2fv(screenPos[1]);
 				glVertex2fv(screenPos[3]);
@@ -775,7 +775,7 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 			else 
 			{
 				std::cout << "Else" << std::endl;
-				if (drawCell->edges[edgeNum]->Neighbor(drawCell))
+				if (drawCell->edges[edgeIndex]->Neighbor(drawCell))
 				{
 					std::cout << "Neighbour" << std::endl;
 					Vertex curPos(0, this->viewer_posn[0], this->viewer_posn[1]);
@@ -790,7 +790,7 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 					}
 					Edge viewAngleR(0, &curPos, &viewClipR, 0, 0, 0);
 					Edge viewAngleL(0, &curPos, &viewClipL, 0, 0, 0);
-					Draw_Cell(drawCell->edges[edgeNum]->Neighbor(drawCell), viewAngleR, viewAngleL);
+					Draw_Cell(drawCell->edges[edgeIndex]->Neighbor(drawCell), viewAngleR, viewAngleL);
 				}
 			}
 		}
