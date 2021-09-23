@@ -126,11 +126,11 @@ draw(void)
 		{
 			viewCell = maze->view_cell;
 		}
-		Vertex curPos(0,maze->viewer_posn[0],maze->viewer_posn[1]);
-		Vertex viewClipR(0,maze->viewer_posn[0]+ maze->focal_length*cos(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)),maze->viewer_posn[1]+ maze->focal_length*sin(Maze::To_Radians(maze->viewer_dir-maze->viewer_fov/2)));
-		Vertex viewClipL(0,maze->viewer_posn[0]+ maze->focal_length*cos(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)),maze->viewer_posn[1]+ maze->focal_length*sin(Maze::To_Radians(maze->viewer_dir+maze->viewer_fov/2)));
-		Edge viewAngleR(0,&curPos,&viewClipR,0,0,0);
-		Edge viewAngleL(0,&curPos,&viewClipL,0,0,0);
+		Vertex curPos(0, maze->viewer_posn[0], maze->viewer_posn[1]);
+		Vertex viewClipR(0, maze->viewer_posn[0] + maze->focal_length * cos(Maze::To_Radians(maze->viewer_dir - maze->viewer_fov / 2)), maze->viewer_posn[1] + maze->focal_length * sin(Maze::To_Radians(maze->viewer_dir - maze->viewer_fov / 2)));
+		Vertex viewClipL(0, maze->viewer_posn[0] + maze->focal_length * cos(Maze::To_Radians(maze->viewer_dir + maze->viewer_fov / 2)), maze->viewer_posn[1] + maze->focal_length * sin(Maze::To_Radians(maze->viewer_dir + maze->viewer_fov / 2)));
+		Edge viewAngleR(0, &curPos, &viewClipR, 0, 0, 0);
+		Edge viewAngleL(0, &curPos, &viewClipL, 0, 0, 0);
 		maze->Draw_Cell(maze->view_cell, viewAngleR, viewAngleL);
 	}
 }

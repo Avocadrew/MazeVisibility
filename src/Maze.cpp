@@ -629,10 +629,10 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 	//Model Matrix
 	float world2view[4][4] = 
 	{
-		{cos(Maze::To_Radians(this->viewer_dir)),	0,	-sin(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * cos(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -sin(Maze::To_Radians(this->viewer_dir))},
-		{0,		1,	0,		-this->viewer_posn[2]},
-		{-sin(Maze::To_Radians(this->viewer_dir)),	0,	-cos(Maze::To_Radians(this->viewer_dir)),	-this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir))},
-		{0,		0,	0,		1}
+		{cos(Maze::To_Radians(this->viewer_dir)), 0, -sin(Maze::To_Radians(this->viewer_dir)), -this->viewer_posn[1] * cos(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -sin(Maze::To_Radians(this->viewer_dir))},
+		{0, 1, 0, -this->viewer_posn[2]},
+		{-sin(Maze::To_Radians(this->viewer_dir)),	0, -cos(Maze::To_Radians(this->viewer_dir)), -this->viewer_posn[1] * -sin(Maze::To_Radians(this->viewer_dir)) - this->viewer_posn[0] * -cos(Maze::To_Radians(this->viewer_dir))},
+		{0, 0, 0, 1}
 	};
 	for (int edgeIndex = 0; edgeIndex < 4; edgeIndex++) {
 		//patameters

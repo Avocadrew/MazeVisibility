@@ -1,11 +1,11 @@
 # ninja log v5
-42	208	6541213106946775	CMakeFiles/MazeLib.dir/src/LineSeg.cpp.obj	fee5c6f9d98441bc
-22	212	6541213107176164	CMakeFiles/MazeLib.dir/src/Edge.cpp.obj	b730d5786f3655e
-35	215	6541213107255948	CMakeFiles/MazeLib.dir/src/Vertex.cpp.obj	9661f8506cd8fec5
-11	641	6541213111518549	CMakeFiles/MazeVisibility.dir/src/RunMaze.cpp.obj	9c9da58f26e920b3
-30	684	6541213111948242	CMakeFiles/MazeLib.dir/src/Cell.cpp.obj	7aaee22352fbd96a
-6	798	6541213113108401	CMakeFiles/MazeVisibility.dir/src/MapWidget.cpp.obj	92052c0b31f41b15
-17	929	6541213114410136	CMakeFiles/MazeVisibility.dir/src/MazeWindow.cpp.obj	1df6da9cb640987b
-0	958	6541213114689391	CMakeFiles/MazeVisibility.dir/src/Maze.cpp.obj	ab7a57f3159afc0f
-685	960	6541213112499144	MazeLib.lib	ba120bae5eab1bc3
-961	1884	6541213123518228	MazeVisibility.exe	5107dccd7e4cafbb
+31	131	6541215989916176	CMakeFiles/MazeLib.dir/src/LineSeg.cpp.obj	fee5c6f9d98441bc
+21	155	6541215990165517	CMakeFiles/MazeLib.dir/src/Edge.cpp.obj	b730d5786f3655e
+37	158	6541215990265245	CMakeFiles/MazeLib.dir/src/Vertex.cpp.obj	9661f8506cd8fec5
+26	489	6541215993570451	CMakeFiles/MazeLib.dir/src/Cell.cpp.obj	7aaee22352fbd96a
+15	513	6541215993799279	CMakeFiles/MazeVisibility.dir/src/RunMaze.cpp.obj	9c9da58f26e920b3
+6	552	6541215994190044	CMakeFiles/MazeVisibility.dir/src/MapWidget.cpp.obj	92052c0b31f41b15
+489	587	6541215994040448	MazeLib.lib	ba120bae5eab1bc3
+10	786	6541215996527401	CMakeFiles/MazeVisibility.dir/src/MazeWindow.cpp.obj	1df6da9cb640987b
+1	826	6541215996936591	CMakeFiles/MazeVisibility.dir/src/Maze.cpp.obj	ab7a57f3159afc0f
+827	1352	6541216001736252	MazeVisibility.exe	5107dccd7e4cafbb
