@@ -1,25 +1,21 @@
 /************************************************************************
-     File:        MazeWindow.cpp
-
-     Author:     
-                  Stephen Chenney, schenney@cs.wisc.edu
-     Modifier
-                  Yu-Chi Lai, yu-chi@cs.wisc.edu
-
-     Comment:    
+	 File:        MazeWindow.cpp
+	 Author:
+				  Stephen Chenney, schenney@cs.wisc.edu
+	 Modifier
+				  Yu-Chi Lai, yu-chi@cs.wisc.edu
+	 Comment:
 						(c) 2001-2002 Stephen Chenney, University of Wisconsin at Madison
-
 						Class header file for the MazeWindow class. The MazeWindow is
 						the window in which the viewer's view of the maze is displayed.
-		
 
-     Platform:    Visio Studio.Net 2003 (converted to 2005)
-
+	 Platform:    Visio Studio.Net 2003 (converted to 2005)
 *************************************************************************/
 
 #include "MazeWindow.h"
 #include "Maze.h"
 #include <iostream>
+#include <math.h>
 #include <Fl/math.h>
 #include <Fl/gl.h>
 #include <GL/glu.h>
@@ -31,9 +27,9 @@
 // * Constructor
 //=========================================================================
 MazeWindow::
-MazeWindow(int x, int y, int width, int height, const char *label,Maze *m)
+MazeWindow(int x, int y, int width, int height, const char* label, Maze* m)
 	: Fl_Gl_Window(x, y, width, height, label)
-//=========================================================================
+	//=========================================================================
 {
 	maze = m;
 
@@ -48,7 +44,7 @@ MazeWindow(int x, int y, int width, int height, const char *label,Maze *m)
 // * Set the maze. Also causes a redraw.
 //=========================================================================
 void MazeWindow::
-Set_Maze(Maze *m)
+Set_Maze(Maze* m)
 //=========================================================================
 {
 	// Change the maze
@@ -87,28 +83,37 @@ draw(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_QUADS);
-	// Draw the "floor". It is an infinite plane perpendicular to
-	// vertical, so we know it projects to cover the entire bottom
-	// half of the screen. Walls of the maze will be drawn over the top
-	// of it.
-	glColor3f(0.2f, 0.2f, 0.2f);
-	glVertex2f(-w() * 0.5f, -h() * 0.5f);
-	glVertex2f(w() * 0.5f, -h() * 0.5f);
-	glVertex2f(w() * 0.5f, 0.0);
-	glVertex2f(-w() * 0.5f, 0.0);
+	
 
 	// Draw the ceiling. It will project to the entire top half
 	// of the window.
-	glColor3f(0.4f, 0.4f, 0.4f);
+	glColor3f(1.0f, 0.39f, .0f);
 	glVertex2f(w() * 0.5f, h() * 0.5f);
 	glVertex2f(-w() * 0.5f, h() * 0.5f);
 	glVertex2f(-w() * 0.5f, 0.0);
 	glVertex2f(w() * 0.5f, 0.0);
 	glEnd();
 
+	glBegin(GL_POLYGON);
+	glColor3f(1.0f, 0.86f, .0f);
+	for (double i = 0; i < 2 * M_PI; i += M_PI / 24)
+		glVertex3f((cos(i) * 110) + w() * .0f, (sin(i) * 110) + h() * .0f, 0.0);
+	glEnd();
+
+	// Draw the "floor". It is an infinite plane perpendicular to
+	// vertical, so we know it projects to cover the entire bottom
+	// half of the screen. Walls of the maze will be drawn over the top
+	// of it.
+	glBegin(GL_QUADS);
+	glColor3f(0.58f, 0.47f, 0.19f);
+	glVertex2f(-w() * 0.5f, -h() * 0.5f);
+	glVertex2f(w() * 0.5f, -h() * 0.5f);
+	glVertex2f(w() * 0.5f, 0.0);
+	glVertex2f(-w() * 0.5f, 0.0);
+	glEnd();
 
 	if (maze) {
-		
+
 		// Set the focal length. We can do this because we know the
 		// field of view and the size of the image in view space. Note
 		// the static member function of the Maze class for converting
@@ -122,7 +127,7 @@ draw(void)
 		// plus the focal length.
 		maze->frame_num++;
 		std::cout << maze->frame_num << std::endl;
-		if (viewCell != maze->view_cell) 
+		if (viewCell != maze->view_cell)
 		{
 			viewCell = maze->view_cell;
 		}
@@ -146,7 +151,7 @@ Drag(float dt)
 {
 	float   x_move, y_move, z_move;
 
-	if ( down ) {
+	if (down) {
 		int	dx = x_down - x_last;
 		int   dy = y_down - y_last;
 		float dist;
@@ -187,7 +192,7 @@ Update(float dt)
 {
 	// Update the view
 
-	if ( down || z_key ) // Only do anything if the mouse button is down.
+	if (down || z_key) // Only do anything if the mouse button is down.
 		return Drag(dt);
 
 	// Nothing changed, so no need for a redraw.
@@ -207,39 +212,37 @@ handle(int event)
 		return Fl_Gl_Window::handle(event);
 
 	// Event handling routine.
-	switch ( event ) {
-		case FL_PUSH:
-			down = true;
-			x_last = x_down = Fl::event_x();
-			y_last = y_down = Fl::event_y();
-			d_down = maze->viewer_dir;
+	switch (event) {
+	case FL_PUSH:
+		down = true;
+		x_last = x_down = Fl::event_x();
+		y_last = y_down = Fl::event_y();
+		d_down = maze->viewer_dir;
+		return 1;
+	case FL_DRAG:
+		x_last = Fl::event_x();
+		y_last = Fl::event_y();
+		return 1;
+	case FL_RELEASE:
+		down = false;
+		return 1;
+	case FL_KEYBOARD:
+		/*
+		if ( Fl::event_key() == FL_Up )	{
+			z_key = 1;
 			return 1;
-		case FL_DRAG:
-			x_last = Fl::event_x();
-			y_last = Fl::event_y();
+		}
+		if ( Fl::event_key() == FL_Down ){
+			z_key = -1;
 			return 1;
-			case FL_RELEASE:
-			down = false;
-			return 1;
-		case FL_KEYBOARD:
-			/*
-			if ( Fl::event_key() == FL_Up )	{
-				z_key = 1;
-				return 1;
-			}
-			if ( Fl::event_key() == FL_Down ){
-				z_key = -1;
-				return 1;
-			}
-			*/
-			return Fl_Gl_Window::handle(event);
-		case FL_FOCUS:
-		case FL_UNFOCUS:
-			return 1;
+		}
+		*/
+		return Fl_Gl_Window::handle(event);
+	case FL_FOCUS:
+	case FL_UNFOCUS:
+		return 1;
 	}
 
 	// Pass any other event types on the superclass.
 	return Fl_Gl_Window::handle(event);
 }
-
-

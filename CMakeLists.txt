@@ -18,7 +18,7 @@ add_executable(MazeVisibility
     ${SRC_DIR}Maze.cpp
     ${SRC_DIR}MazeWindow.h
     ${SRC_DIR}MazeWindow.cpp
-    ${SRC_DIR}RunMaze.cpp)
+    ${SRC_DIR}RunMaze.cpp "src/stb_image.h")
 
 add_library(MazeLib 
     ${SRC_DIR}Cell.h
@@ -29,7 +29,7 @@ add_library(MazeLib
     ${SRC_DIR}LineSeg.cpp
     ${SRC_DIR}Point.h
     ${SRC_DIR}Vertex.cpp
-    ${SRC_DIR}Vertex.h)
+    ${SRC_DIR}Vertex.h "src/stb_image.h")
 
 target_link_libraries(MazeVisibility 
     debug ${LIB_DIR}Debug/fltk_formsd.lib      optimized ${LIB_DIR}Release/fltk_forms.lib
