@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <fstream>
 #include <math.h>
 #include "Maze.h"
 #include <Fl/Fl.h>
@@ -147,24 +148,6 @@ int main(int argc, char *argv[])
 
 	window->end();
 	window->show();
-
-	Maze* new_maze;
-	new_maze = new Maze("Sources/maze-10x10-100");
-	if (new_maze) {
-		// We have a new maze
-		// Delete the old one
-		delete maze;
-		maze = new_maze;
-
-		// Change the maze in the map and the 3D view.
-		map_window->Set_Maze(maze);
-		maze_window->Set_Maze(maze);
-
-		// If we weren't running timeouts, start them. This allows the
-		// view to be animated.
-		if (!Fl::has_timeout(Timeout_Callback, NULL))
-			Fl::add_timeout(0.0, Timeout_Callback, NULL);
-	}
 
 	return Fl::run();
 }
