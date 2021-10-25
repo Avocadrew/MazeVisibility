@@ -105,7 +105,7 @@ draw(void)
 	// half of the screen. Walls of the maze will be drawn over the top
 	// of it.
 	glBegin(GL_QUADS);
-	glColor3f(0.58f, 0.47f, 0.19f);
+	glColor3f(0.28f, 0.28f, 0.28f);
 	glVertex2f(-w() * 0.5f, -h() * 0.5f);
 	glVertex2f(w() * 0.5f, -h() * 0.5f);
 	glVertex2f(w() * 0.5f, 0.0);

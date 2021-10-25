@@ -767,6 +767,9 @@ Draw_Cell(Cell* drawCell, Edge viewLineR, Edge viewLineL) {
 				glColor3fv(drawCell->edges[edgeIndex]->color);
 				glVertex2fv(screenPos[0]);
 				glVertex2fv(screenPos[1]);
+				float contrast[3] = { 1.0f - drawCell->edges[edgeIndex]->color[0], 1.0f - drawCell->edges[edgeIndex]->color[1], 1.0f - drawCell->edges[edgeIndex]->color[2] };
+				//std::cout << 255 - drawCell->edges[edgeIndex]->color[0] << 255 - drawCell->edges[edgeIndex]->color[1] << 255 - drawCell->edges[edgeIndex]->color[2]<<'\n';
+				glColor3fv(contrast);
 				glVertex2fv(screenPos[3]);
 				glVertex2fv(screenPos[2]);
 				glEnd();
