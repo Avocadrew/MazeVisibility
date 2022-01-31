@@ -19,3 +19,4 @@ Can be built directly with CMake with the given CMakeLists text file, preferred 
 ## Implementation
 Done as coursework for CS3026 Introduction to Computer Graphics in NTUST, Fall 2021. More details about the course project could be seen in [this link](http://dgmm.csie.ntust.edu.tw/?ac1=courprojdetail_CG2012F_3&id=5ecf8d85e9b81&sid=614a94d120c83).
 
+##### © 2022 Andrew (Jun-Yu) Chen
